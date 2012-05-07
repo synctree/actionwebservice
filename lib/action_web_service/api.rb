@@ -82,8 +82,10 @@ module ActionWebService # :nodoc:
           if expects
             expects.each do |type|
               type = type.element_type if type.is_a?(ArrayType)
-              if type.type_class.ancestors.include?(ActiveRecord::Base) && !allow_active_record_expects
-                raise(ActionWebServiceError, "ActiveRecord model classes not allowed in :expects")
+              if Object.const_defined?('ActiveRecord')
+                if type.type_class.ancestors.include?(ActiveRecord::Base) && !allow_active_record_expects
+                  raise(ActionWebServiceError, "ActiveRecord model classes not allowed in :expects")
+                end
               end
             end
           end
