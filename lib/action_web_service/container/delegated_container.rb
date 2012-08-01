@@ -66,7 +66,7 @@ module ActionWebService # :nodoc:
   
         private
           def call_web_service_definition_callbacks(container_class, web_service_name, service_info)
-            (self."web_service_definition_callbacks" || []).each do |block|
+            (self.web_service_definition_callbacks || []).each do |block|
               block.call(container_class, web_service_name, service_info)
             end
           end
