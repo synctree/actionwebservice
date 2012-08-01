@@ -12,7 +12,7 @@ class Class # :nodoc:
       end
       
       def self.#{sym}=(value)
-        class_attribute(:#{sym}, value)
+        class_attribute(:#{sym} => value)
       end
 
       def #{sym}

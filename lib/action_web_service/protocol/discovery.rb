@@ -9,7 +9,7 @@ module ActionWebService # :nodoc:
 
       module ClassMethods # :nodoc:
         def register_protocol(klass)
-          class_attribute("web_service_protocols", [klass])
+          class_attribute("web_service_protocols" => [klass])
         end
       end
 

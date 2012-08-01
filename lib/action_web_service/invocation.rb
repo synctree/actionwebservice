@@ -99,12 +99,12 @@ module ActionWebService # :nodoc:
 
       private
         def append_interceptors_to_chain(condition, interceptors)
-          class_attribute("#{condition}_invocation_interceptors", interceptors)
+          class_attribute("#{condition}_invocation_interceptors" => interceptors)
         end
 
         def prepend_interceptors_to_chain(condition, interceptors)
           interceptors = interceptors + self.send("#{condition}_invocation_interceptors")
-          class_attribute("#{condition}_invocation_interceptors", interceptors)
+          class_attribute("#{condition}_invocation_interceptors" => interceptors)
         end
 
         def extract_conditions!(interceptors)
@@ -115,8 +115,8 @@ module ActionWebService # :nodoc:
         def add_interception_conditions(interceptors, conditions)
           return unless conditions
           included, excluded = conditions[:only], conditions[:except]
-          class_attribute("included_intercepted_methods", condition_hash(interceptors, included)) && return if included
-          class_attribute("excluded_intercepted_methods", condition_hash(interceptors, excluded)) if excluded
+          class_attribute("included_intercepted_methods" => condition_hash(interceptors, included)) && return if included
+          class_attribute("excluded_intercepted_methods" => condition_hash(interceptors, excluded)) if excluded
         end
 
         def condition_hash(interceptors, *methods)

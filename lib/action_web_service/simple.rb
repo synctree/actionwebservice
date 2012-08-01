@@ -28,7 +28,7 @@ module ActionWebService
     class << self
       def base(type)
         type = type.to_s.camelize(:lower)
-        class_attribute("xml_base", type)
+        class_attribute("xml_base" => type)
         class_eval <<-END
           def xml_base; "#{type}"; end
         END
@@ -40,7 +40,7 @@ module ActionWebService
       
       def restriction(type, value)
         type = type.to_s.camelize(:lower)
-        class_attribute("simple_restrictions", type => value)
+        class_attribute("simple_restrictions" => {type => value})
       end
       
       def restrictions

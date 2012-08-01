@@ -92,8 +92,8 @@ module ActionWebService # :nodoc:
           name = name.to_sym
           public_name = public_api_method_name(name)
           method = Method.new(name, public_name, expects, returns)
-          class_attribute("api_methods", name => method)
-          class_attribute("api_public_method_names", public_name => name)
+          class_attribute("api_methods" => {name => method})
+          class_attribute("api_public_method_names" => {public_name => name})
         end
 
         # Whether the given method name is a service method on this API
@@ -194,7 +194,7 @@ module ActionWebService # :nodoc:
             return instance
           end
           instance = Method.new(name, public_api_method_name(name), nil, nil)
-          class_attribute("default_api_method_instance", instance)
+          class_attribute("default_api_method_instance" => instance)
           instance
         end
 

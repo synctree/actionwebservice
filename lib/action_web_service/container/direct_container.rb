@@ -49,13 +49,13 @@ module ActionWebService # :nodoc:
             unless definition.respond_to?(:ancestors) && definition.ancestors.include?(ActionWebService::API::Base)
               raise(ContainerError, "#{definition.to_s} is not a valid API definition")
             end
-            class_attribute("web_service_api", definition)
+            class_attribute("web_service_api" => definition)
             call_web_service_api_callbacks(self, definition)
           end
         end
   
         def add_web_service_api_callback(&block) # :nodoc:
-          class_attribute("web_service_api_callbacks", [block])
+          class_attribute("web_service_api_callbacks" => [block])
         end
   
         private

@@ -47,7 +47,7 @@ module ActionWebService # :nodoc:
           else
             info = { name => { :object => object } }
           end
-          class_attribute("web_services", info)
+          class_attribute("web_services" => info)
           call_web_service_definition_callbacks(self, name, info)
         end
   
@@ -61,7 +61,7 @@ module ActionWebService # :nodoc:
         end
   
         def add_web_service_definition_callback(&block) # :nodoc:
-          class_attribute("web_service_definition_callbacks", [block])
+          class_attribute("web_service_definition_callbacks" => [block])
         end
   
         private

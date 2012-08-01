@@ -49,7 +49,7 @@ module ActionWebService
       def member(name, type, options={})
         name = name.to_sym
         type = ActionWebService::SignatureTypes.canonical_signature_entry({ name => type }, 0)
-        class_attribute("struct_members", name => [type, options])
+        class_attribute("struct_members" => {name => [type, options]})
         class_eval <<-END
           def #{name}; @#{name}; end
           def #{name}=(value); @#{name} = value; end
