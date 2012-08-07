@@ -8,16 +8,16 @@ require 'rake/contrib/rubyforgepublisher'
 require 'fileutils'
 require File.join(File.dirname(__FILE__), 'lib', 'action_web_service', 'version')
 
-PKG_BUILD     = ENV['PKG_BUILD'] ? '.' + ENV['PKG_BUILD'] : ''
-PKG_NAME      = 'actionwebservice'
+PKG_BUILD     = ENV['PKG_BUILD'] ? '.' + ENV['PKG_BUILD'] : ".#{Time.now.strftime('%Y%m%d%H%M%S')}"
+PKG_NAME      = 'dps-actionwebservice'
 PKG_VERSION   = ActionWebService::VERSION::STRING + PKG_BUILD
 PKG_FILE_NAME   = "#{PKG_NAME}-#{PKG_VERSION}"
 PKG_DESTINATION = ENV["RAILS_PKG_DESTINATION"] || "../#{PKG_NAME}"
 
 RELEASE_NAME  = "REL #{PKG_VERSION}"
 
-RUBY_FORGE_PROJECT = "aws"
-RUBY_FORGE_USER    = "webster132"
+RUBY_FORGE_PROJECT = ""
+RUBY_FORGE_USER    = ""
 
 desc "Default Task"
 task :default => [ :test ]
@@ -25,17 +25,28 @@ task :default => [ :test ]
 
 # Run the unit tests
 Rake::TestTask.new { |t|
+  test_scope = ENV['SCOPE'] || '*'
+  t.test_files = FileList[ test_scope.split(',').collect{|scope| "test/#{scope}_test.rb"} ]
+
+  t.warning = !!ENV['WARNINGS']
+  t.verbose = !!ENV['VERBOSE']
+
   t.libs << "test"
-  t.test_files = Dir['test/*_test.rb']
-  t.verbose = true
 }
 
 SCHEMA_PATH = File.join(File.dirname(__FILE__), *%w(test fixtures db_definitions))
 
 desc 'Build the MySQL test database'
 task :build_database do 
-  %x( mysqladmin -uroot create actionwebservice_unittest )
-  %x( mysql -uroot actionwebservice_unittest < #{File.join(SCHEMA_PATH, 'mysql.sql')} )
+  %x( mysql -u root -p --execute='CREATE DATABASE actionwebservice_unittest; CREATE USER unit_tester@localhost; GRANT ALL PRIVILEGES ON actionwebservice_unittest.* TO unit_tester;' )
+  %x( mysql -uunit_tester -p actionwebservice_unittest < #{File.join(SCHEMA_PATH, 'mysql.sql')} )
+end
+
+desc 'Build the sqlite3 test database'
+task :build_sqlite3_database do
+  filename = 'actionwebservice_unittest.db'
+  File.delete filename if File.exist? filename
+  %x(sqlite3 #{filename}  < #{File.join(SCHEMA_PATH, 'sqlite3.sql')})
 end
 
 
@@ -67,13 +78,13 @@ spec = Gem::Specification.new do |s|
   s.description = %q{Adds WSDL/SOAP and XML-RPC web service support to Action Pack}
   s.version = PKG_VERSION
 
-  s.author = "Leon Breedt, Kent Sibilev"
-  s.email = "bitserf@gmail.com, ksibilev@yahoo.com"
-  s.rubyforge_project = "aws"
-  s.homepage = "http://www.rubyonrails.org"
+  s.author = "Laurence A. Lee, Leon Breedt, Kent Sibilev"
+  s.email = "rubyjedi@gmail.com, bitserf@gmail.com, ksibilev@yahoo.com"
+  s.homepage = "http://wiki.github.com/rubyjedi/actionwebservice/"
 
-  s.add_dependency('actionpack', '= 2.3.2' + PKG_BUILD)
-  s.add_dependency('activerecord', '= 2.3.2' + PKG_BUILD)
+  s.add_dependency('activesupport', '~> 2.3.0')
+  s.add_dependency('actionpack',    '~> 2.3.0')
+  s.add_dependency('activerecord',  '~> 2.3.0')
 
   s.has_rdoc = true
   s.requirements << 'none'
@@ -93,18 +104,18 @@ Rake::GemPackageTask.new(spec) do |p|
 end
 
 
-# Publish beta gem
-desc "Publish the API documentation"
-task :pgem => [:package] do 
-  Rake::SshFilePublisher.new("davidhh@wrath.rubyonrails.org", "public_html/gems/gems", "pkg", "#{PKG_FILE_NAME}.gem").upload
-  `ssh davidhh@wrath.rubyonrails.org './gemupdate.sh'`
-end
-
-# Publish documentation
-desc "Publish the API documentation"
-task :pdoc => [:rdoc] do 
-  Rake::SshDirPublisher.new("davidhh@wrath.rubyonrails.org", "public_html/aws", "doc").upload
-end
+## Publish beta gem
+#desc "Publish the API documentation"
+#task :pgem => [:package] do
+#  Rake::SshFilePublisher.new("davidhh@wrath.rubyonrails.org", "public_html/gems/gems", "pkg", "#{PKG_FILE_NAME}.gem").upload
+#  `ssh davidhh@wrath.rubyonrails.org './gemupdate.sh'`
+#end
+#
+## Publish documentation
+#desc "Publish the API documentation"
+#task :pdoc => [:rdoc] do
+#  Rake::SshDirPublisher.new("davidhh@wrath.rubyonrails.org", "public_html/aws", "doc").upload
+#end
 
 
 def each_source_file(*args)
@@ -161,13 +172,13 @@ task :lines do
   puts "  Lines #{total_lines}, LOC #{total_loc}"
 end
 
-desc "Publish the release files to RubyForge."
-task :release => [ :package ] do
-  require 'rubyforge'
-
-  packages = %w( gem tgz zip ).collect{ |ext| "pkg/#{PKG_NAME}-#{PKG_VERSION}.#{ext}" }
-
-  rubyforge = RubyForge.new
-  rubyforge.login
-  rubyforge.add_release(PKG_NAME, PKG_NAME, "REL #{PKG_VERSION}", *packages)
-end
+#desc "Publish the release files to RubyForge."
+#task :release => [ :package ] do
+#  require 'rubyforge'
+#
+#  packages = %w( gem tgz zip ).collect{ |ext| "pkg/#{PKG_NAME}-#{PKG_VERSION}.#{ext}" }
+#
+#  rubyforge = RubyForge.new
+#  rubyforge.login
+#  rubyforge.add_release(PKG_NAME, PKG_NAME, "REL #{PKG_VERSION}", *packages)
+#end

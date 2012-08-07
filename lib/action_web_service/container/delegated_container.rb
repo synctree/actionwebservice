@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module ActionWebService # :nodoc:
   module Container # :nodoc:
     module Delegated # :nodoc:
@@ -46,7 +47,7 @@ module ActionWebService # :nodoc:
           else
             info = { name => { :object => object } }
           end
-          write_inheritable_hash("web_services", info)
+          class_attribute("web_services" => info)
           call_web_service_definition_callbacks(self, name, info)
         end
   
@@ -56,16 +57,16 @@ module ActionWebService # :nodoc:
         end
   
         def web_services # :nodoc:
-          read_inheritable_attribute("web_services") || {}
+          self.web_services || {}
         end
   
         def add_web_service_definition_callback(&block) # :nodoc:
-          write_inheritable_array("web_service_definition_callbacks", [block])
+          class_attribute("web_service_definition_callbacks" => [block])
         end
   
         private
           def call_web_service_definition_callbacks(container_class, web_service_name, service_info)
-            (read_inheritable_attribute("web_service_definition_callbacks") || []).each do |block|
+            (self.web_service_definition_callbacks || []).each do |block|
               block.call(container_class, web_service_name, service_info)
             end
           end

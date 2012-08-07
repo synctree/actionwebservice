@@ -1,4 +1,5 @@
-require File.dirname(__FILE__) + '/abstract_unit'
+# encoding: UTF-8
+require 'abstract_unit'
 
 module BaseTest
   class API < ActionWebService::API::Base

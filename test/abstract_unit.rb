@@ -1,3 +1,4 @@
+# encoding: UTF-8
 $: << "#{File.dirname(__FILE__)}/../lib"
 ENV["RAILS_ENV"] = "test"
 require 'rubygems'
@@ -15,7 +16,7 @@ ActiveSupport::Deprecation.debug = true
 ActiveRecord::Base.logger = ActionController::Base.logger = Logger.new("debug.log")
 
 begin
-  require 'activerecord'
+  require 'active_record'
   require "active_record/test_case"
   require "active_record/fixtures" unless Object.const_defined?(:Fixtures)
 rescue LoadError => e
@@ -25,13 +26,17 @@ end
 ActiveRecord::Base.configurations = {
   'mysql' => {
     :adapter  => "mysql",
-    :username => "root",
+    :username => "unit_tester",
     :encoding => "utf8",
     :database => "actionwebservice_unittest"
+  },
+  'sqlite3' => {
+    :adapter  => "sqlite3",
+    :database => "actionwebservice_unittest.db"
   }
 }
 
-ActiveRecord::Base.establish_connection 'mysql'
+ActiveRecord::Base.establish_connection 'sqlite3'
 
 class ActiveSupport::TestCase
   include ActiveRecord::TestFixtures

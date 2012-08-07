@@ -1,4 +1,5 @@
-require File.dirname(__FILE__) + '/abstract_unit'
+# encoding: UTF-8
+require 'abstract_unit'
 require 'stringio'
 
 class ActionController::Base; def rescue_action(e) raise e end; end
@@ -160,6 +161,7 @@ module DispatcherTest
   end
 
   class AbstractController < ActionController::Base
+    acts_as_web_service
     def generate_wsdl
       self.request ||= ::ActionController::TestRequest.new
       to_wsdl

@@ -1,6 +1,6 @@
+# encoding: UTF-8
 require 'rbconfig'
 require 'find'
-require 'ftools'
 
 include Config
 

@@ -1,4 +1,5 @@
-require File.dirname(__FILE__) + '/abstract_unit'
+# encoding: UTF-8
+require 'abstract_unit'
 require 'action_web_service/test_invoke'
 
 class TestInvokeAPI < ActionWebService::API::Base
@@ -21,6 +22,7 @@ class TestInvokeService < ActionWebService::Base
 end
 
 class TestController < ActionController::Base
+  acts_as_web_service
   def rescue_action(e); raise e; end
 end
 

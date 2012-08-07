@@ -1,3 +1,4 @@
+# encoding: UTF-8
 module ActionWebService # :nodoc:
   module Container # :nodoc:
     module ActionController # :nodoc:
@@ -61,7 +62,7 @@ module ActionWebService # :nodoc:
             begin
               require_dependency(file_name)
             rescue LoadError => load_error
-              requiree = / -- (.*?)(\.rb)?$/.match(load_error).to_a[1]
+              requiree = / -- (.*?)(\.rb)?$/.match(load_error.message).to_a[1]
               msg = requiree == file_name ? "Missing API definition file in apis/#{file_name}.rb" : "Can't load file: #{requiree}"
               raise LoadError.new(msg).copy_blame!(load_error)
             end

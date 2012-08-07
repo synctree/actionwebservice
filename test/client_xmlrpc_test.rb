@@ -1,4 +1,5 @@
-require File.dirname(__FILE__) + '/abstract_client'
+# encoding: UTF-8
+require 'abstract_client'
 
 
 module ClientXmlRpcTest
@@ -24,6 +25,7 @@ module ClientXmlRpcTest
   end
 
   class ClientContainer < ActionController::Base
+    acts_as_web_service
     web_client_api :client, :xmlrpc, "http://localhost:#{PORT}/client/api", :api => ClientTest::API
 
     def get_client

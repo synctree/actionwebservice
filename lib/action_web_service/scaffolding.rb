@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'benchmark'
 require 'pathname'
 
@@ -41,21 +42,21 @@ module ActionWebService
         add_template_helper(Helpers)
         module_eval <<-"end_eval", __FILE__, __LINE__ + 1
           def #{action_name}
-            if request.method == :get
+            if request.get?
               setup_invocation_assigns
               render_invocation_scaffold 'methods'
             end
           end
 
           def #{action_name}_method_params
-            if request.method == :get
+            if request.get?
               setup_invocation_assigns
               render_invocation_scaffold 'parameters'
             end
           end
 
           def #{action_name}_submit
-            if request.method == :post
+            if request.post?
               setup_invocation_assigns
               protocol_name = params['protocol'] ? params['protocol'].to_sym : :soap
               case protocol_name
@@ -107,16 +108,16 @@ module ActionWebService
               customized_template = "\#{self.class.controller_path}/#{action_name}/\#{action}"
               default_template = scaffold_path(action)
               begin
-                content = @template.render(:file => customized_template)
+                content = view_context.render(:file => customized_template)
               rescue ActionView::MissingTemplate
-                content = @template.render(:file => default_template)
+                content = view_context.render(:file => default_template)
               end
-              @template.instance_variable_set("@content_for_layout", content)
-              if self.active_layout.nil?
+              @content_for_layout = content
+              #if self.action_has_layout?
+              #  render :file => self.send(:_layout), :use_full_path => true
+              #else
                 render :file => scaffold_path("layout")
-              else
-                render :file => self.active_layout, :use_full_path => true
-              end
+              #end
             end
 
             def scaffold_path(template_name)
@@ -124,8 +125,8 @@ module ActionWebService
             end
 
             def reset_invocation_response
-              erase_render_results
-              response.instance_variable_set :@header, Rack::Utils::HeaderHash.new(::ActionController::Response::DEFAULT_HEADERS.merge("cookie" => []))
+              self.instance_variable_set(:@_response_body, nil)
+              response.instance_variable_set :@header, Rack::Utils::HeaderHash.new("cookie" => [], 'Content-Type' => 'text/html')
             end
 
             def public_method_name(service_name, method_name)
@@ -178,12 +179,12 @@ module ActionWebService
               true)
             if member_type.custom?
               parameters << content_tag('li', label)
-              parameters << content_tag('ul', nested_content)
+              parameters << content_tag('ul', nested_content.html_safe)
             else
-              parameters << content_tag('li', label + ' ' + nested_content)
+              parameters << content_tag('li', (label + ' ' + nested_content).html_safe)
             end
           end
-          content_tag('ul', parameters)
+          content_tag('ul', parameters.html_safe)
         else
           # If the data source was structured previously we already have the index set          
           field_name_base = "#{field_name_base}[#{idx}]" unless was_structured
@@ -224,10 +225,10 @@ module ActionWebService
 
       def service_method_list(service)
         action = @scaffold_action_name + '_method_params'
-        methods = service.api_methods_full.map do |desc, name|
-          content_tag("li", link_to(desc, :action => action, :service => service.name, :method => name))
+        methods = service.api_methods_full.sort {|a, b| a[1] <=> b[1]}.map do |desc, name|
+          content_tag("li", link_to(name, :action => action, :service => service.name, :method => name))
         end
-        content_tag("ul", methods.join("\n"))
+        content_tag("ul", methods.join("\n").html_safe)
       end
     end
 

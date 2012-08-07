@@ -1,3 +1,4 @@
+# encoding: UTF-8
 require 'time'
 require 'date'
 require 'xmlrpc/datetime'
@@ -30,7 +31,11 @@ module ActionWebService # :nodoc:
 
         def cast_expects(api_method, params) # :nodoc:
           return [] if api_method.expects.nil?
-          api_method.expects.zip(params).map{ |type, param| cast(param, type) }
+          if params.is_a?(Array)
+              api_method.expects.zip(params).map{ |type, param| cast(param, type) }
+          elsif params.is_a?(Hash)
+              api_method.expects.map {|type| cast(params[type.name.to_s], type) }
+          end
         end
 
         def cast_returns(api_method, return_value) # :nodoc:
@@ -56,6 +61,8 @@ module ActionWebService # :nodoc:
             value.entries.map do |entry|
               cast(entry, signature_type.element_type)
             end
+          elsif signature_type.simple?
+            return value
           elsif signature_type.structured?
             cast_to_structured_type(value, signature_type)
           elsif !signature_type.custom?
@@ -98,8 +105,10 @@ module ActionWebService # :nodoc:
           when :decimal
             BigDecimal(value.to_s)
           when :time
-            value = "%s/%s/%s %s:%s:%s" % value.values_at(*%w[2 3 1 4 5 6]) if value.kind_of?(Hash)
-            if value.kind_of?(Time) 
+            if value.kind_of?(Hash)
+              value = "%s/%s/%s %s:%s:%s" % value.values_at(*%w[2 3 1 4 5 6])
+              Time.respond_to?(:strptime) ? Time.strptime(value.to_s, "%m/%d/%Y %H:%M:%S") : Time.parse(value.to_s)
+            elsif value.kind_of?(Time) 
               value
             elsif value.kind_of?(DateTime)
               value.to_time
@@ -107,14 +116,20 @@ module ActionWebService # :nodoc:
               Time.parse(value.to_s)
             end
           when :date
-            value = "%s/%s/%s" % value.values_at(*%w[2 3 1]) if value.kind_of?(Hash)
+            if value.kind_of?(Hash)
+              value = "%s/%s/%s" % value.values_at(*%w[2 3 1])
+              return Date.strptime(value.to_s,"%m/%d/%Y")
+            end
             value.kind_of?(Date) ? value : Date.parse(value.to_s)
           when :datetime
-            value = "%s/%s/%s %s:%s:%s" % value.values_at(*%w[2 3 1 4 5 6]) if value.kind_of?(Hash)
+            if value.kind_of?(Hash)
+              value = "%s/%s/%s %s:%s:%s" % value.values_at(*%w[2 3 1 4 5 6])
+              return DateTime.strptime(value.to_s,"%m/%d/%Y %H:%M:%S")
+            end
             value.kind_of?(DateTime) ? value : DateTime.parse(value.to_s)
           end
         end
-
+        
         def cast_to_structured_type(value, signature_type) # :nodoc:
           obj = nil
           # if the canonical classes are the same or if the given value is of 
