@@ -3,11 +3,13 @@ class Class # :nodoc:
   def class_inheritable_option(sym, default_value=nil)
    class_attribute sym => default_value
     class_eval <<-EOS
+      alias :old_#{sym} :#{sym}
+
       def self.#{sym}(value=nil)
         if !value.nil?
-          class_attribute(:#{sym}, value)
+          self.#{sym} = value
         else
-          self.#{sym}
+          self.old_#{sym}
         end
       end
       
