@@ -4,7 +4,7 @@
 ## the Rakefile and invoked via 'rake package'
 ## --------------------------------------------------------------------------------
 Gem::Specification.new do |s|
-  s.name = 'dps-actionwebservice'
+  s.name = 'actionwebservice'
   s.summary = "Web service support for Action Pack."
   s.description = %q{Adds WSDL/SOAP and XML-RPC web service support to Action Pack}
   s.version = "3.1.0"
