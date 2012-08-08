@@ -22,7 +22,6 @@
 # WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #++
 
-
 begin
   require 'activesupport'
   require 'actioncontroller'
@@ -35,6 +34,22 @@ rescue LoadError
   gem 'activesupport', '>=3.0.5'
   gem 'actionpack'   , '>=3.0.5'
   gem 'activerecord' , '>=3.0.5'
+end
+
+class Class
+  def class_attribute_with_hash_support(*attrs)
+    attrs.each do |attr|
+      if attr.kind_of?(Hash)
+        attr.each do |key, value|
+          class_attribute_without_hash_support(key)
+          self.send("#{key}=", value)
+        end
+      else
+        class_attribute_without_hash_support(attr)
+      end
+    end
+  end
+  alias_method_chain :class_attribute, :hash_support
 end
 
 $:.unshift(File.dirname(__FILE__) + "/action_web_service/vendor/")
