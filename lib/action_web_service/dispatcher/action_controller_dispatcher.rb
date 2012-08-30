@@ -115,7 +115,7 @@ module ActionWebService # :nodoc:
 
           def log_error(e)
             message = "\n#{e.class} (#{e.message}):\n#{e.backtrace.join("\n")}"
-            logger.warn(messafe)
+            logger.warn(message)
           end
 
 
