@@ -9,7 +9,11 @@ module ActionWebService # :nodoc:
 
       module ClassMethods # :nodoc:
         def register_protocol(klass)
-          class_attribute("web_service_protocols" => [klass])
+          if respond_to?(:web_service_protocols)
+            class_attribute("web_service_protocols" => ([klass] + (self.web_service_protocols || [])).uniq)
+          else
+            class_attribute("web_service_protocols" => [klass])
+          end
         end
       end
 
