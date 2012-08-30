@@ -113,6 +113,12 @@ module ActionWebService # :nodoc:
             web_service_direct_invoke_without_controller(invocation)
           end
 
+          def log_error(e)
+            message = "\n#{e.class} (#{e.message}):\n#{e.backtrace.join("\n")}"
+            logger.warn(messafe)
+          end
+
+
           def log_request(ws_request, body)
             unless logger.nil?
               name = ws_request.method_name
