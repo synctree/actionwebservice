@@ -81,22 +81,6 @@ module ActionWebService # :nodoc:
 
       alias :after_invocation :append_after_invocation
 
-      def before_invocation_interceptors # :nodoc:
-        self.before_invocation_interceptors
-      end
-
-      def after_invocation_interceptors # :nodoc:
-        self.after_invocation_interceptors
-      end
-
-      def included_intercepted_methods # :nodoc:
-        self.included_intercepted_methods || {}
-      end
-      
-      def excluded_intercepted_methods # :nodoc:
-        self.excluded_intercepted_methods || {}
-      end
-
       private
         def append_interceptors_to_chain(condition, interceptors)
           class_attribute("#{condition}_invocation_interceptors" => interceptors)
@@ -143,11 +127,11 @@ module ActionWebService # :nodoc:
       end
 
       def before_invocation(name, args, &block)
-        call_interceptors(self.class.before_invocation_interceptors, [name, args], &block)
+        call_interceptors(self.class.before_invocation_interceptors, [name, args], &block) if self.class.respond_to?(:before_invocation_interceptors)
       end
 
       def after_invocation(name, args, result)
-        call_interceptors(self.class.after_invocation_interceptors, [name, args, result])
+        call_interceptors(self.class.after_invocation_interceptors, [name, args, result]) if self.class.respond_to?(:after_invocation_interceptors)
       end
 
       private
